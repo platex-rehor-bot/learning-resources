@@ -234,6 +234,24 @@ const mapBundleInfoWithTitles = async (): Promise<APIDoc[]> => {
 const APIResourceItem: React.FC<{ resource: APIDoc }> = ({ resource }) => {
   const chrome = useChrome();
 
+  /**
+   * Navigate while keeping the help panel open.
+   * Uses Chrome's own history object to avoid requiring a Router context
+   * (the help panel module may render outside the shell's BrowserRouter).
+   * Re-asserts drawer content after route change so Chrome's safety-net
+   * effect does not close the panel.
+   */
+  const navigateKeepPanel = (path: string) => {
+    const { drawerActions, chromeHistory } = chrome;
+    chromeHistory.push(path);
+    setTimeout(() => {
+      drawerActions?.setDrawerPanelContent({
+        scope: 'learningResources',
+        module: './HelpPanel',
+      });
+    }, 50);
+  };
+
   const handleResourceClick = () => {
     const environment = chrome.getEnvironment();
     const consoleDocsUrl = convertToConsoleDocsUrl(
@@ -241,8 +259,18 @@ const APIResourceItem: React.FC<{ resource: APIDoc }> = ({ resource }) => {
       resource.url,
       environment
     );
-    // Navigate within the same page (keeps help panel open)
-    window.location.href = consoleDocsUrl;
+    // Use client-side navigation to preserve help panel state
+    try {
+      const url = new URL(consoleDocsUrl);
+      const target = `${url.pathname}${url.search}${url.hash}`;
+      if (url.origin === window.location.origin) {
+        navigateKeepPanel(target);
+      } else {
+        window.location.assign(consoleDocsUrl);
+      }
+    } catch {
+      navigateKeepPanel(consoleDocsUrl);
+    }
   };
 
   return (
@@ -287,6 +315,16 @@ const APIResourceItem: React.FC<{ resource: APIDoc }> = ({ resource }) => {
 const APIPanelContent: React.FC = () => {
   const intl = useIntl();
   const chrome = useChrome();
+  const navigateKeepPanel = (path: string) => {
+    const { drawerActions, chromeHistory } = chrome;
+    chromeHistory.push(path);
+    setTimeout(() => {
+      drawerActions?.setDrawerPanelContent({
+        scope: 'learningResources',
+        module: './HelpPanel',
+      });
+    }, 50);
+  };
   const [activeToggle, setActiveToggle] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
@@ -372,9 +410,13 @@ const APIPanelContent: React.FC = () => {
           <Button
             variant="link"
             component="a"
-            href="https://console.redhat.com/docs/api"
-            isInline
+            href="/docs/api"
             data-ouia-component-id="help-panel-api-docs-link"
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              navigateKeepPanel('/docs/api');
+            }}
+            isInline
           >
             {intl.formatMessage(messages.apiDocumentationCatalogLinkText)}
           </Button>

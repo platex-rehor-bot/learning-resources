@@ -24,6 +24,7 @@ const makeChromeApi = (overrides: Record<string, any> = {}) => ({
       getUser: () => Promise.resolve(mockAuthUser),
     },
     drawerActions: {},
+    chromeHistory: { push: () => {}, replace: () => {} },
     ...overrides,
   },
 });

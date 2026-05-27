@@ -18,6 +18,8 @@ jest.mock('@redhat-cloud-services/frontend-components/useChrome', () => ({
   useChrome: () => ({
     getBundleData: () => ({ bundleId: 'insights' }),
     getAvailableBundles: () => [{ id: 'insights', title: 'RHEL' }],
+    chromeHistory: { push: jest.fn(), replace: jest.fn() },
+    getEnvironment: () => 'prod',
   }),
 }));
 

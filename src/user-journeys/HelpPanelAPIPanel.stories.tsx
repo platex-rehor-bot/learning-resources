@@ -98,10 +98,7 @@ export const Step03_NavigateToAPIsTab: Story = {
 
     const catalogLink = canvas.getByText(/API Documentation Catalog/i);
     expect(catalogLink).toBeInTheDocument();
-    expect(catalogLink.closest('a')).toHaveAttribute(
-      'href',
-      'https://console.redhat.com/docs/api'
-    );
+    expect(catalogLink.closest('a')).toHaveAttribute('href', '/docs/api');
 
     console.log('UJ: ✅ APIs tab opened with description and catalog link');
   },

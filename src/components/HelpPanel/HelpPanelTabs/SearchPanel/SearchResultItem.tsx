@@ -54,6 +54,24 @@ const SearchResultItem: React.FC<{
   const intl = useIntl();
   const chrome = useChrome();
   const openQuickStartInHelpPanel = useOpenQuickStartInHelpPanel();
+
+  /**
+   * Navigate while keeping the help panel open.
+   * Uses Chrome's own history object to avoid requiring a Router context
+   * (the help panel module may render outside the shell's BrowserRouter).
+   * Re-asserts drawer content after route change so Chrome's safety-net
+   * effect does not close the panel.
+   */
+  const navigateKeepPanel = (path: string) => {
+    const { drawerActions, chromeHistory } = chrome;
+    chromeHistory.push(path);
+    setTimeout(() => {
+      drawerActions?.setDrawerPanelContent({
+        scope: 'learningResources',
+        module: './HelpPanel',
+      });
+    }, 50);
+  };
   const [isBookmarked, setIsBookmarked] = useState(
     result.isBookmarked ?? false
   );
@@ -116,7 +134,17 @@ const SearchResultItem: React.FC<{
       });
     } else if (result.url) {
       if (result.type === 'service') {
-        window.location.assign(result.url);
+        // Use client-side navigation to preserve help panel state
+        try {
+          const url = new URL(result.url, window.location.origin);
+          if (url.origin === window.location.origin) {
+            navigateKeepPanel(`${url.pathname}${url.search}${url.hash}`);
+          } else {
+            window.location.assign(result.url);
+          }
+        } catch {
+          navigateKeepPanel(result.url);
+        }
       } else {
         window.open(result.url, '_blank', 'noopener,noreferrer');
       }

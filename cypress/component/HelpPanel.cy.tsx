@@ -45,6 +45,7 @@ const Wrapper = ({ children, flags = defaultFlags, api }: { children: React.Reac
         bundleTitle: 'RHEL',
       }),
       getAvailableBundles: () => [],
+      chromeHistory: { push: () => {}, replace: () => {} },
       auth: {
         getUser: () => Promise.resolve({
           identity: {
@@ -166,6 +167,7 @@ describe('HelpPanel', () => {
         bundleId: 'rhel',
         bundleTitle: 'RHEL',
       }),
+      chromeHistory: { push: () => {}, replace: () => {} },
     } as any);
     cy.mount(
       <Wrapper>
@@ -249,9 +251,9 @@ describe('HelpPanel', () => {
       cy.contains('OpenShift').should('be.visible');
       cy.contains('Settings').should('be.visible');
 
-      // Check internal link
+      // Check internal link (rendered as <a> via Button component="a")
       cy.contains(getMessageText('apiDocumentationCatalogLinkText'))
-        .should('have.attr', 'href', 'https://console.redhat.com/docs/api');
+        .should('have.attr', 'href', '/docs/api');
     });
   });
 
@@ -290,6 +292,7 @@ describe('HelpPanel', () => {
         bundleId: 'rhel',
         bundleTitle: 'RHEL',
       }),
+      chromeHistory: { push: () => {}, replace: () => {} },
     } as any);
     cy.mount(
       <Wrapper>
@@ -322,6 +325,7 @@ describe('HelpPanel', () => {
         bundleId: 'rhel',
         bundleTitle: 'RHEL',
       }),
+      chromeHistory: { push: () => {}, replace: () => {} },
     } as any);
 
     cy.mount(
@@ -341,6 +345,7 @@ describe('HelpPanel', () => {
         bundleId: 'rhel',
         bundleTitle: 'RHEL',
       }),
+      chromeHistory: { push: () => {}, replace: () => {} },
     } as any);
 
     cy.mount(
@@ -394,6 +399,7 @@ describe('HelpPanel', () => {
         bundleTitle: 'RHEL',
       }),
       getAvailableBundles: () => [],
+      chromeHistory: { push: () => {}, replace: () => {} },
       auth: {
         getUser: () => Promise.resolve({
           identity: {
@@ -670,6 +676,7 @@ describe('HelpPanel', () => {
         bundleId: 'rhel',
         bundleTitle: 'RHEL',
       }),
+      chromeHistory: { push: () => {}, replace: () => {} },
     } as any);
 
     cy.mount(

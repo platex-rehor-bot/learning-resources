@@ -654,7 +654,7 @@ const LearnPanelContent: React.FC<{
               <Button
                 variant="link"
                 component="a"
-                href={`/learning-resources?tab=all`}
+                href="/learning-resources?tab=all"
                 isInline
                 iconPosition="end"
               >

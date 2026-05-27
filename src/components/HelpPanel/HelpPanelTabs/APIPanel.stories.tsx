@@ -124,10 +124,7 @@ export const Default: Story = {
     ).toBeInTheDocument();
 
     const catalogLink = canvas.getByText(/API Documentation Catalog/i);
-    expect(catalogLink.closest('a')).toHaveAttribute(
-      'href',
-      'https://console.redhat.com/docs/api'
-    );
+    expect(catalogLink.closest('a')).toHaveAttribute('href', '/docs/api');
 
     // API names are now capitalized and "API" suffix is stripped
     expect(canvas.getByText('Advisor')).toBeInTheDocument();
