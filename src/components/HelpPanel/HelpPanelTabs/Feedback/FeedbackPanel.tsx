@@ -159,7 +159,6 @@ const FeedbackPanel: React.FC<SubTabProps> = ({ setNewActionTitle }) => {
             </StackItem>
             {cardConfigs.map((config, index) => {
               const IconComponent = config.icon;
-              const isReportBug = config.page === 'reportBugOne';
               return (
                 <StackItem key={index}>
                   <Card
@@ -169,7 +168,10 @@ const FeedbackPanel: React.FC<SubTabProps> = ({ setNewActionTitle }) => {
                     className="feedback-card"
                   >
                     <CardTitle>
-                      <Flex alignItems={{ default: 'alignItemsCenter' }}>
+                      <Flex
+                        alignItems={{ default: 'alignItemsCenter' }}
+                        gap={{ default: 'gapSm' }}
+                      >
                         <FlexItem>
                           <IconComponent className="feedback-card-icon" />
                         </FlexItem>
@@ -183,32 +185,7 @@ const FeedbackPanel: React.FC<SubTabProps> = ({ setNewActionTitle }) => {
                         </FlexItem>
                       </Flex>
                     </CardTitle>
-                    <CardBody>
-                      {isReportBug ? (
-                        <>
-                          {intl.formatMessage(config.body)}{' '}
-                          <Content
-                            component="a"
-                            href={SUPPORT_CASE_URL}
-                            target="_blank"
-                            rel="noreferrer"
-                            onClick={(e: React.MouseEvent) =>
-                              e.stopPropagation()
-                            }
-                            onKeyDown={(e: React.KeyboardEvent) => {
-                              if (e.key === 'Enter' || e.key === ' ') {
-                                e.stopPropagation();
-                              }
-                            }}
-                          >
-                            {intl.formatMessage(messages.openSupportCaseText)}
-                          </Content>
-                          .
-                        </>
-                      ) : (
-                        intl.formatMessage(config.body)
-                      )}
-                    </CardBody>
+                    <CardBody>{intl.formatMessage(config.body)}</CardBody>
                   </Card>
                 </StackItem>
               );

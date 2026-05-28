@@ -290,7 +290,7 @@ const messages = defineMessages({
   describeBugUrgentCases: {
     id: 'helpPanel.feedback.describeBug',
     defaultMessage:
-      'Describe the bug you encountered. Include where it is located and what action caused it. If this issue is urgent or blocking your workflow,',
+      'Describe the bug you encountered. Include where it is located and what action caused it.',
   },
   openSupportCase: {
     id: 'helpPanel.feedback.openSupportCase',
