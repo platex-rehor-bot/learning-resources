@@ -12,6 +12,7 @@ import {
   Label,
   Pagination,
   PaginationProps,
+  SearchInput,
   Spinner,
   Stack,
   StackItem,
@@ -23,6 +24,7 @@ import {
 } from '@patternfly/react-core';
 import { useChrome } from '@redhat-cloud-services/frontend-components/useChrome';
 import { useIntl } from 'react-intl';
+import useOramaSearch from 'chrome/search/useOramaSearch';
 import messages from '../../../Messages';
 import {
   fetchBundleInfo,
@@ -176,6 +178,23 @@ export const convertToConsoleDocsUrl = (
   return `${baseUrl}/docs/api/${nameWithoutApiSuffix}`;
 };
 
+const useDebounce = (value: string, delay: number) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+};
+
+const API_SEARCH_SCHEMA = {
+  name: 'string' as const,
+  displayName: 'string' as const,
+  services: 'string[]' as const,
+};
+
 const mapBundleInfoWithTitles = async (): Promise<APIDoc[]> => {
   try {
     const [bundleInfoList, bundles] = await Promise.all([
@@ -308,7 +327,9 @@ const APIResourceItem: React.FC<{ resource: APIDoc }> = ({ resource }) => {
   );
 };
 
-const APIPanelContent: React.FC = () => {
+const APIPanelContent: React.FC<{
+  setNewActionTitle: (title: string) => void;
+}> = ({ setNewActionTitle }) => {
   const intl = useIntl();
   const chrome = useChrome();
   const navigateKeepPanel = useNavigateKeepPanel();
@@ -316,6 +337,10 @@ const APIPanelContent: React.FC = () => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [apiDocs, setApiDocs] = useState<APIDoc[]>([]);
+  const [searchText, setSearchText] = useState('');
+  const [searchResults, setSearchResults] = useState<APIDoc[] | null>(null);
+
+  const debouncedSearchText = useDebounce(searchText, 500);
 
   useEffect(() => {
     const loadApiDocs = async () => {
@@ -325,6 +350,37 @@ const APIPanelContent: React.FC = () => {
 
     loadApiDocs();
   }, []);
+
+  const { query, isReady } = useOramaSearch(apiDocs, API_SEARCH_SCHEMA);
+
+  useEffect(() => {
+    const trimmed = debouncedSearchText.trim();
+    if (!trimmed) {
+      setSearchResults(null);
+      return;
+    }
+    if (!isReady) return;
+
+    let cancelled = false;
+    query(trimmed)
+      .then((results) => {
+        if (!cancelled) {
+          setSearchResults(results.map((r) => r.document));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSearchResults(null);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedSearchText, isReady, query]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchText, activeToggle]);
 
   const {
     bundleId = '',
@@ -345,14 +401,16 @@ const APIPanelContent: React.FC = () => {
     displayBundleName.toLowerCase() === 'home' ||
     displayBundleName.toLowerCase() === 'landing';
 
+  const baseResources = searchResults ?? apiDocs;
+
   const filteredResources = useMemo(() => {
     if (activeToggle === 'bundle' && !isHomePage) {
-      return apiDocs.filter((resource) =>
+      return baseResources.filter((resource) =>
         resource.services.includes(displayBundleName)
       );
     }
-    return apiDocs;
-  }, [activeToggle, isHomePage, displayBundleName, apiDocs]);
+    return baseResources;
+  }, [activeToggle, isHomePage, displayBundleName, baseResources]);
 
   const paginatedResources = useMemo(() => {
     const startIndex = (page - 1) * perPage;
@@ -383,6 +441,16 @@ const APIPanelContent: React.FC = () => {
     if (isSelected) {
       setActiveToggle(value);
     }
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchText(value);
+    setNewActionTitle(value);
+  };
+
+  const handleSearchClear = () => {
+    setSearchText('');
+    setNewActionTitle('');
   };
 
   return (
@@ -417,6 +485,16 @@ const APIPanelContent: React.FC = () => {
             {intl.formatMessage(messages.apiDocumentationCatalogLinkText)}
           </Button>
         </Content>
+      </StackItem>
+
+      <StackItem>
+        <SearchInput
+          placeholder={intl.formatMessage(messages.apiSearchPlaceholder)}
+          value={searchText}
+          onChange={(_event, value) => handleSearchChange(value)}
+          onClear={handleSearchClear}
+          data-ouia-component-id="help-panel-api-search-input"
+        />
       </StackItem>
 
       <StackItem>
@@ -511,10 +589,10 @@ const APIPanelContent: React.FC = () => {
 
 const APIPanel: React.FC<{
   setNewActionTitle: (title: string) => void;
-}> = () => {
+}> = ({ setNewActionTitle }) => {
   return (
     <Suspense fallback={<Spinner size="lg" />}>
-      <APIPanelContent />
+      <APIPanelContent setNewActionTitle={setNewActionTitle} />
     </Suspense>
   );
 };

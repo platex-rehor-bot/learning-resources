@@ -104,10 +104,7 @@ export const Viewer = ({
       >
         <div className="pf-v6-u-h-100">
           <Sidebar id="content-wrapper" isPanelRight hasGutter>
-            <SidebarContent
-              id="quick-starts"
-              className="pf-v6-u-background-color-200"
-            >
+            <SidebarContent id="quick-starts" hasNoBackground>
               {showBookmarks && (
                 <React.Fragment>
                   <CatalogSection
@@ -200,7 +197,8 @@ export const Viewer = ({
             </SidebarContent>
             <SidebarPanel
               variant="sticky"
-              className="pf-v6-u-background-color-200 pf-v6-u-pl-lg pf-v6-u-pl-0-on-lg"
+              className="pf-v6-u-pl-lg pf-v6-u-pl-0-on-lg"
+              hasNoBackground
             >
               <TableOfContents
                 defaultActive="bookmarks"

@@ -178,7 +178,6 @@ const HelpPanelCustomTabs = React.forwardRef<HelpPanelCustomTabsRef>(
         <div className="lr-c-help-panel-tabs-wrapper">
           <Tabs
             className="lr-c-help-panel-custom-tabs"
-            isBox
             activeKey={activeTabId}
             onSelect={(_e, eventKey) => {
               if (typeof eventKey === 'string') {
