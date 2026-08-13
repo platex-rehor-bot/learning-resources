@@ -148,4 +148,4 @@ parameters:
   - name: IMAGE_TAG
     required: true
   - name: IMAGE
-    value: quay.io/redhat-services-prod/hcc-platex-services/learning-resources
+    value: quay.io/redhat-services-prod/hcc-platex-services-tenant/learning-resources
