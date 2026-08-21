@@ -939,5 +939,54 @@ spec:
       expect(editorValue).toContain('name: getting-started');
       expect(editorValue).toContain('displayName: GS');
     });
+
+    it('loads content YAML and merges tags from metadata.yml', async () => {
+      jest.useRealTimers();
+
+      mockedListRepoQuickstarts.mockResolvedValueOnce([
+        { name: 'subs-simple', displayName: 'Simple Content Access' },
+      ]);
+      const contentYaml =
+        'metadata:\n  name: subs-simple\nspec:\n  displayName: Simple Content Access\n';
+      mockedGetRepoQuickstartContent.mockResolvedValueOnce({
+        name: 'subs-simple',
+        files: [
+          {
+            name: 'metadata.yml',
+            content:
+              'kind: QuickStarts\nname: subs-simple\ntags:\n- kind: bundle\n  value: subscriptions\n',
+          },
+          { name: 'subs-simple.yaml', content: contentYaml },
+        ],
+      });
+
+      renderWithContext(<CreatorYAMLView />);
+
+      await act(async () => {
+        fireEvent.click(
+          screen.getByRole('button', { name: /load from repo/i })
+        );
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('Simple Content Access')).toBeInTheDocument();
+      });
+
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Simple Content Access' })
+      );
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      const editor = screen.getByTestId('mock-monaco-editor');
+      const editorValue = (editor as HTMLTextAreaElement).value;
+      expect(editorValue).toContain('displayName: Simple Content Access');
+      expect(editorValue).toContain('value: subscriptions');
+    });
   });
 });

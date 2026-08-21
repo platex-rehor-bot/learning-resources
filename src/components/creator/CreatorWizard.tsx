@@ -42,6 +42,7 @@ import {
   NAME_BUNDLES,
   NAME_DESCRIPTION,
   NAME_DURATION,
+  NAME_ICON,
   NAME_KIND,
   NAME_METADATA_NAME,
   NAME_PANEL_INTRODUCTION,
@@ -143,6 +144,7 @@ const PropUpdater = ({
   const rawKind: string | undefined = values[NAME_KIND];
   const title: string | undefined = values[NAME_TITLE];
   const description: string | undefined = values[NAME_DESCRIPTION];
+  const icon: string | null | undefined = values[NAME_ICON];
   const url: string | undefined = values[NAME_URL];
   const duration: number | string | undefined = values[NAME_DURATION];
   const prerequisites: string[] | undefined = values[NAME_PREREQUISITES];
@@ -195,7 +197,7 @@ const PropUpdater = ({
           : undefined,
       displayName: title ?? '',
       description: description ?? '',
-      icon: null,
+      icon: icon ?? null,
       link:
         meta?.fields?.url && url !== undefined && isValidUrl(url)
           ? {
@@ -218,6 +220,7 @@ const PropUpdater = ({
     rawKind,
     title,
     description,
+    icon,
     url,
     duration,
     prerequisites,
@@ -237,7 +240,7 @@ const FileDownload = () => {
 
   const quickstartName = useMemo(() => {
     const yamlFile = files.find(
-      (f) => f.name !== 'metadata.yaml' && f.name.endsWith('.yaml')
+      (f) => !f.name.startsWith('metadata.') && f.name.endsWith('.yaml')
     );
     if (!yamlFile) return null;
     const name = yamlFile.name.replace(/\.yaml$/, '');
@@ -447,6 +450,7 @@ const CreatorWizard = ({
       [NAME_BUNDLES]: currentBundles,
       [NAME_TAGS]: currentTags,
       [NAME_TITLE]: quickStart.spec.displayName || '',
+      [NAME_ICON]: quickStart.spec.icon ?? null,
       [NAME_DESCRIPTION]: quickStart.spec.description || '',
       [NAME_DURATION]: quickStart.spec.durationMinutes,
       [NAME_URL]: quickStart.spec.link?.href,

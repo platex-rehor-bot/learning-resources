@@ -12,6 +12,7 @@ export const NAME_BUNDLES = 'bundles';
 export const NAME_DESCRIPTION = 'description';
 export const NAME_DURATION = 'duration';
 export const NAME_URL = 'url';
+export const NAME_ICON = 'icon';
 
 export const NAME_PANEL_INTRODUCTION = 'panel-overview';
 export const NAME_PREREQUISITES = 'prerequisites';

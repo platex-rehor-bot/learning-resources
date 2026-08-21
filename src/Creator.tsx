@@ -54,11 +54,13 @@ const CreatorInternal = ({
   const filterMap = useFilterMap({ data: filterData });
 
   const [rawQuickStart, setRawQuickStart] = useState<ExtendedQuickstart>({
+    apiVersion: 'console.openshift.io/v1',
     metadata: {
       name: 'test-quickstart',
       tags: [],
     },
     spec: {
+      version: 0.1,
       displayName: '',
       icon: null,
       description: '',
@@ -189,14 +191,16 @@ const CreatorInternal = ({
       .replaceAll(/(^-+)|(-+$)/g, '');
 
     const adjustedQuickstart = {
-      ...quickStart,
-      spec: {
-        ...quickStart.spec,
-        icon: undefined,
-      },
+      apiVersion: quickStart.apiVersion || 'console.openshift.io/v1',
+      kind: 'QuickStarts',
       metadata: {
         ...quickStart.metadata,
         name: effectiveName,
+      },
+      spec: {
+        version: quickStart.spec.version ?? 0.1,
+        ...quickStart.spec,
+        icon: quickStart.spec.icon ?? null,
       },
     };
 
@@ -221,7 +225,7 @@ const CreatorInternal = ({
       },
       {
         name: `${effectiveName}.yaml`,
-        content: YAML.stringify(adjustedQuickstart),
+        content: YAML.stringify(adjustedQuickstart, { nullStr: '~' }),
       },
     ];
   }, [quickStart, bundles, tags]);

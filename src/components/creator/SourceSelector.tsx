@@ -25,6 +25,7 @@ import {
   NAME_BUNDLES,
   NAME_DESCRIPTION,
   NAME_DURATION,
+  NAME_ICON,
   NAME_KIND,
   NAME_METADATA_NAME,
   NAME_PANEL_INTRODUCTION,
@@ -108,6 +109,7 @@ const SourceSelector = (props: UseFieldApiConfig) => {
     formApi.change(NAME_PANEL_INTRODUCTION, undefined);
     formApi.change(NAME_TASK_TITLES, undefined);
     formApi.change(NAME_TASKS_ARRAY, undefined);
+    formApi.change(NAME_ICON, undefined);
   };
 
   const handleSelectScratch = () => {
@@ -125,7 +127,7 @@ const SourceSelector = (props: UseFieldApiConfig) => {
       const yamlFile = content.files.find(
         (f) =>
           (f.name.endsWith('.yml') || f.name.endsWith('.yaml')) &&
-          f.name !== 'metadata.yaml'
+          !f.name.startsWith('metadata.')
       );
       if (!yamlFile) {
         setError(`No quickstart YAML file found in "${name}".`);
@@ -150,6 +152,7 @@ const SourceSelector = (props: UseFieldApiConfig) => {
 
       if (spec.displayName) formApi.change(NAME_TITLE, spec.displayName);
       if (spec.description) formApi.change(NAME_DESCRIPTION, spec.description);
+      if (spec.icon !== undefined) formApi.change(NAME_ICON, spec.icon);
       if (spec.durationMinutes !== undefined)
         formApi.change(NAME_DURATION, spec.durationMinutes);
       if (spec.link?.href) formApi.change(NAME_URL, spec.link.href);
@@ -184,15 +187,21 @@ const SourceSelector = (props: UseFieldApiConfig) => {
 
       const bundles: string[] = [];
       const tagsByKind: { [kind: string]: string[] } = {};
-      if (Array.isArray(metadata.tags)) {
-        metadata.tags.forEach((tag: { kind?: string; value?: string }) => {
-          if (tag.kind === 'bundle' && tag.value) {
-            bundles.push(tag.value);
-          } else if (tag.kind && tag.value) {
-            if (!tagsByKind[tag.kind]) tagsByKind[tag.kind] = [];
-            tagsByKind[tag.kind].push(tag.value);
-          }
-        });
+      const metadataFile = content.files.find((f) =>
+        f.name.startsWith('metadata.')
+      );
+      if (metadataFile) {
+        const meta = YAML.parse(metadataFile.content);
+        if (Array.isArray(meta?.tags)) {
+          meta.tags.forEach((tag: { kind?: string; value?: string }) => {
+            if (tag.kind === 'bundle' && tag.value) {
+              bundles.push(tag.value);
+            } else if (tag.kind && tag.value) {
+              if (!tagsByKind[tag.kind]) tagsByKind[tag.kind] = [];
+              tagsByKind[tag.kind].push(tag.value);
+            }
+          });
+        }
       }
       if (bundles.length > 0) formApi.change(NAME_BUNDLES, bundles);
       if (Object.keys(tagsByKind).length > 0)
